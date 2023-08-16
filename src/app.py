@@ -36,41 +36,75 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# GET all of the users
+
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def get_users():
+    users = User.query.all()
+    users_serialized = list(map(lambda x: x.serialize(), users))
+    return jsonify({"msg": 'Completed', "users": users_serialized})
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+#GET single user
 
-    return jsonify(response_body), 200
+@app.route('/user/<int:user_id>', methods=['GET'])
+def single_user(user_id):
+    
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        raise APIException('User not found', status_code=404)
+    return jsonify(user.serialize()), 200
+
+#GET all of the characters
 
 @app.route('/character', methods=['GET'])
-def handle_hell():
+def get_characters():
+    characters = Character.query.all()
+    characters_serialized = list(map(lambda x: x.serialize(), characters))
+    return jsonify({"msg": 'Completed', "characters": characters_serialized})
 
-    response_body = {
-        "character_id":"character_id"
-    }
+#GET single character
 
-    return jsonify(response_body), 200
+@app.route('/character/<int:character_id>', methods=['GET'])
+def single_character(character_id):
+    
+    character = Character.query.filter_by(id=character_id).first()
+    if character is None:
+        raise APIException('Character does not exist', status_code=404)
+    return jsonify(character.serialize()), 200
+
+#GET all of the planets
 
 @app.route('/planet', methods=['GET'])
-def handle_planet():
+def get_planets():
+    planets = Planet.query.all()
+    planets_serialized = list(map(lambda x: x.serialize(), planets))
+    return jsonify({"msg": 'Completed', "planets": planets_serialized})
 
-    response_body = {
-        "planet_id":"planet_id"
-    }
+#GET single planet
 
-    return jsonify(response_body), 200
+@app.route('/planet/<int:planet_id>', methods=['GET'])
+def single_planet(planet_id):
+    
+    planet = Planet.query.filter_by(id=planet_id).first()
+    if planet is None:
+        raise APIException('Planet does not exist', status_code=404)
+    return jsonify(planet.serialize()), 200
 
-@app.route('/favorites', methods=['GET'])
-def handle_favorites():
+#Favorites-----------------------------------------------------------
 
-    response_body = {
-        "favorites_id":"favorites_id"
-    }
+#GET specific user's favorites
 
-    return jsonify(response_body), 200
+@app.route('/user/<int:user_id>/favorites', methods=['GET'])
+def handle_favorites(user_id):
+    allfavorites = Favorites.query.filter_by(user_id=user_id).all()
+    favoritesList = list(map(lambda fav: fav.serialize(),allfavorites))
+
+    return jsonify(favoritesList), 200
+
+#POST a new favorite character to a user
+
+#@app.route('/user/<int:user_id>/favorites', methods=['POST'])
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
