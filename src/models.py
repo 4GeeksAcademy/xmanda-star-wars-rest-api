@@ -72,7 +72,7 @@ class Favorites(db.Model):
 
 
     def __repr__(self):
-        return f"This is are {self.user_id} favorite characters and planets"
+        return f"This is user {self.user_id} and has {self.character_id} favorite characters and {self.planet_id} planets"
 
     def serialize(self):
         return {

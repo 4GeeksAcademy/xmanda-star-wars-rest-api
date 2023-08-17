@@ -95,15 +95,67 @@ def single_planet(planet_id):
 #GET specific user's favorites
 
 @app.route('/user/<int:user_id>/favorites', methods=['GET'])
-def handle_favorites(user_id):
-    allfavorites = Favorites.query.filter_by(user_id=user_id).all()
-    favoritesList = list(map(lambda fav: fav.serialize(),allfavorites))
+def get_favorites(user_id):
+    listfavorites = Favorites.query.filter_by(user_id=user_id).all()
+    favorites = list(map(lambda x: x.serialize(),listfavorites))
 
-    return jsonify(favoritesList), 200
+    return jsonify(favorites), 200
+
 
 #POST a new favorite character to a user
 
-#@app.route('/user/<int:user_id>/favorites', methods=['POST'])
+@app.route('/user/<int:user_id>/favorites/character', methods=['POST'])
+def add_character(user_id):
+    request_body_favorite = request.get_json()
+    favorite_character = Favorites.query.filter_by(user_id=user_id, character_id=request_body_favorite["character_id"]).first()
+    if favorite_character is None:
+        raise APIException('Please enter a valid character_id', status_code=404)
+
+    newFavoriteCharacter = Favorites(
+    user_id=user_id, character_id=request_body_favorite["character_id"])    
+    db.session.add(newFavoriteCharacter)
+    db.session.commit()
+    return jsonify("Character added to favorites"), 200
+
+#POST a new favorite planet to a user
+
+@app.route('/user/<int:user_id>/favorites/planet', methods=['POST'])
+def add_planet(user_id):
+    request_body_favorite = request.get_json()
+    favorite_planet = Favorites.query.filter_by(user_id=user_id, planet_id=request_body_favorite["planet_id"]).first()
+    if favorite_planet is None:
+        raise APIException('Please enter a valid planet_id', status_code=404)
+
+    newFavoritePlanet = Favorites(
+    user_id=user_id, planet_id=request_body_favorite["planet_id"])    
+    db.session.add(newFavoritePlanet)
+    db.session.commit()
+    return jsonify("Planet added to favorites"), 200
+
+#DELETE a favorite character from user
+    
+@app.route('/user/<int:user_id>/favorites/character/', methods=['DELETE'])
+def delete_character(user_id):
+    request_body = request.get_json()
+    characterToBeDeleted = Favorites.query.filter_by(user_id=user_id, character_id=request_body["character_id"]).first()
+    if characterToBeDeleted is None:
+        raise APIException("Please select a valid character_id", status_code=404)
+    
+    db.session.delete(characterToBeDeleted)
+    db.session.commit()
+    return jsonify("Character was removed from favorites"), 200
+
+#DELETE a favorite planet from user
+
+def delete_planet(user_id):
+    request_body = request.get_json()
+    planetToBeDeleted = Favorites.query.filter_by(user_id=user_id, planet_id=request_body["planet_id"]).first()
+    if planetToBeDeleted is None:
+        raise APIException("Please select a valid planet_id", status_code=404)
+    
+    db.session.delete(planetToBeDeleted)
+    db.session.commit()
+    return jsonify("Planet was removed from favorites"), 200
 
 
 # this only runs if `$ python src/app.py` is executed
